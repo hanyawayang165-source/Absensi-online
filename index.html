@@ -334,29 +334,41 @@
     if (!nama) { showMsg('Pilih nama Anda terlebih dahulu.', 'err'); return; }
     if (!nik) { showMsg('NIK wajib diisi.', 'err'); return; }
 
-    CURRENT_NAMA = nama; CURRENT_NIK = nik;
-    const initial = nama.trim().charAt(0).toUpperCase();
+    const btn = document.getElementById('btnLogin');
+    const teksAsli = btn.textContent;
+    btn.disabled = true; btn.textContent = 'Memeriksa...';
 
-    document.getElementById('screenLogin').style.display = 'none';
-    document.getElementById('bottomNav').classList.add('show');
-    document.getElementById('greetName').textContent = nama;
-    document.getElementById('avatarInit').textContent = initial;
-    document.getElementById('profilNama').textContent = nama;
-    document.getElementById('profilAvatar').textContent = initial;
-    document.getElementById('profilNik').textContent = nik;
+    callGas_('verifyLoginAbsenOnline', { nama, nik },
+      () => {
+        btn.disabled = false; btn.textContent = teksAsli;
+        CURRENT_NAMA = nama; CURRENT_NIK = nik;
+        const initial = nama.trim().charAt(0).toUpperCase();
 
-    const hour = new Date().getHours();
-    document.getElementById('greetLabel').textContent =
-      hour < 11 ? 'Selamat Pagi,' : hour < 15 ? 'Selamat Siang,' : hour < 18 ? 'Selamat Sore,' : 'Selamat Malam,';
-    document.getElementById('tglHariIni').textContent =
-      new Date().toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short' });
+        document.getElementById('screenLogin').style.display = 'none';
+        document.getElementById('bottomNav').classList.add('show');
+        document.getElementById('greetName').textContent = nama;
+        document.getElementById('avatarInit').textContent = initial;
+        document.getElementById('profilNama').textContent = nama;
+        document.getElementById('profilAvatar').textContent = initial;
+        document.getElementById('profilNik').textContent = nik;
 
-    tickClock(); setInterval(tickClock, 1000);
-    goTab('Home');
-    muatRiwayat();
-    muatJadwal();
+        const hour = new Date().getHours();
+        document.getElementById('greetLabel').textContent =
+          hour < 11 ? 'Selamat Pagi,' : hour < 15 ? 'Selamat Siang,' : hour < 18 ? 'Selamat Sore,' : 'Selamat Malam,';
+        document.getElementById('tglHariIni').textContent =
+          new Date().toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short' });
+
+        tickClock(); setInterval(tickClock, 1000);
+        goTab('Home');
+        muatRiwayat();
+        muatJadwal();
+      },
+      err => {
+        btn.disabled = false; btn.textContent = teksAsli;
+        showMsg('❌ ' + err.message, 'err');
+      }
+    );
   }
-
   function doLogout() {
     document.getElementById('bottomNav').classList.remove('show');
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
