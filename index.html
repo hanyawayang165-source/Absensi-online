@@ -61,17 +61,6 @@
   .btn-primary:disabled { opacity: .55; cursor: default; box-shadow: none; }
   .login-hint { font-size: 11px; color: rgba(255,255,255,.5); margin-top: 6px; }
 
-  .search-wrap { position: relative; }
-  .suggest-list {
-    position: absolute; top: calc(100% + 4px); left: 0; right: 0; z-index: 30;
-    background: #fff; border-radius: 12px; box-shadow: 0 10px 24px rgba(0,0,0,.18);
-    max-height: 220px; overflow-y: auto; display: none;
-  }
-  .suggest-list.show { display: block; }
-  .suggest-item { padding: 11px 14px; font-size: 13.5px; color: var(--ink); cursor: pointer; }
-  .suggest-item:hover, .suggest-item.hl { background: #F2F3FB; }
-  .suggest-empty { padding: 11px 14px; font-size: 13px; color: var(--muted); }
-
   /* ---------- TABS ---------- */
   .screen { display: none; }
   .screen.active { display: block; animation: fadeIn .18s ease; }
@@ -146,13 +135,6 @@
   }
   .chip.active { background: var(--navy); color: #fff; border-color: var(--navy); }
 
-  .mode-btn {
-  flex:1; padding:10px; border-radius:10px; border:1px solid rgba(255,255,255,.25);
-  background: rgba(255,255,255,.08); color: rgba(255,255,255,.7); font-weight:600;
-  font-size:12.5px; cursor:pointer; font-family:'Inter';
-}
-.mode-btn.active { background:#fff; color: var(--navy); border-color:#fff; }
-
   /* ---------- PROFIL TAB ---------- */
   .profil-head { text-align: center; padding: 34px 20px 20px; }
   .profil-avatar {
@@ -193,7 +175,8 @@
   .msg.ok { background: var(--ok-bg); color: var(--ok); display: block; }
   .msg.warn { background: var(--warn-bg); color: var(--warn); display: block; }
 </style>
-<link rel="manifest" href="/manifest.json">
+ <link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#1e3a5f">
 </head>
 <body>
 <div class="app" id="appRoot">
@@ -206,35 +189,21 @@
     </svg>
     <div class="content">
       <div class="brand">AMS Housekeeping</div>
+      <p class="welcome">Selamat Datang<br>di Absensi Online</p>
 
-<div style="display:flex;gap:8px;margin-bottom:18px;">
-  <button type="button" class="mode-btn active" id="btnModeKaryawan" onclick="pilihMode('karyawan')">Karyawan Tetap</button>
-  <button type="button" class="mode-btn" id="btnModeReliever" onclick="pilihMode('reliever')">Reliever</button>
-</div>
+      <div class="field">
+        <label>Nama</label>
+        <select id="fNama"><option value="">Memuat daftar nama...</option></select>
+      </div>
+      <div class="field">
+        <label>NIK</label>
+        <input type="text" id="fNik" placeholder="Masukkan NIK Anda">
+        <div class="login-hint">NIK harus sama persis dengan data di HR.</div>
+      </div>
 
-<p class="welcome">Selamat Datang<br>di Absensi Online</p>
-<div class="field search-wrap">
- 
-  <label>Nama</label>
-  <input type="text" id="fNama" placeholder="Ketik nama Anda..." autocomplete="off">
-  <div class="suggest-list" id="fNamaSuggest"></div>
-</div>
-
-<div class="field" id="fieldNik">
-  <label>NIK</label>
-  <input type="text" id="fNik" placeholder="Masukkan NIK Anda">
-  <div class="login-hint">NIK harus sama persis dengan data di HR.</div>
-</div>
-
-<div class="field" id="fieldPerusahaan" style="display:none;">
-  <label>Perusahaan</label>
-  <input type="text" id="fPerusahaan" placeholder="Otomatis terisi setelah pilih nama" readonly>
-</div>
-
-<button class="btn-primary" id="btnLogin" onclick="doLogin()">Masuk</button>
+      <button class="btn-primary" id="btnLogin" onclick="doLogin()">Masuk</button>
+    </div>
   </div>
-</div>
-
 
   <!-- ===== HOME ===== -->
   <div id="screenHome" class="screen">
@@ -253,7 +222,7 @@
       </div>
     </div>
 
-    <div class="schedule-card" id="scheduleCardAsli">
+    <div class="schedule-card">
       <div class="row-top">
         <span class="lbl">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#14316B" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
@@ -269,21 +238,7 @@
       </div>
       <input type="file" accept="image/*" capture="user" id="inputFotoAbsen" style="display:none;">
     </div>
-<div class="schedule-card" id="relieverCard" style="display:none;">
-  <div class="row-top">
-    <span class="lbl">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#14316B" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
-      Menggantikan Siapa?
-    </span>
-  </div>
-  <select id="selectMenggantikan" style="width:100%;padding:12px;border-radius:10px;border:1px solid var(--line);font-size:13.5px;margin-top:8px;">
-    <option value="">Memuat daftar...</option>
-  </select>
-  <div class="btn-row" style="margin-top:14px;">
-    <button class="btn-primary" id="btnAbsenMasukReliever" onclick="submitAbsen('Masuk')">Absen Masuk</button>
-    <button class="btn-primary btn-outline" id="btnAbsenPulangReliever" onclick="submitAbsen('Pulang')">Absen Pulang</button>
-  </div>
-</div>
+
     <div class="stats-row">
       <div class="stat-card"><div class="num" id="statHadir">-</div><div class="lbl2">Hadir bulan ini</div></div>
       <div class="stat-card"><div class="num" id="statTerlambat">-</div><div class="lbl2">Di luar radius</div></div>
@@ -348,8 +303,7 @@
   const GAS_WEBAPP_URL_ = 'https://script.google.com/macros/s/AKfycbwh9YcVNmGKG5sNIJ2oZ-DXH0XjOa7NF9H649Z7POe16gc2wXFM-R3lpdKZVsroXcO7oA/exec';
 
   let CURRENT_NAMA = '', CURRENT_NIK = '', RIWAYAT_CACHE = [], ACTIVE_FILTER = 'Semua';
-let CURRENT_MODE = 'karyawan';
-let CURRENT_PERUSAHAAN = '';
+
   function callGas_(action, body, onSuccess, onFailure) {
     body.action = action;
     fetch(GAS_WEBAPP_URL_, {
@@ -369,138 +323,60 @@ let CURRENT_PERUSAHAAN = '';
     if (text) setTimeout(() => { box.style.display = 'none'; }, 4500);
   }
 
-  // ---- Search-as-you-type untuk field Nama ----
-  let searchDebounceTimer_ = null;
-  const fNamaInput = document.getElementById('fNama');
-  const fNamaSuggest = document.getElementById('fNamaSuggest');
-
-  fNamaInput.addEventListener('input', function () {
-  const q = this.value.trim();
-  clearTimeout(searchDebounceTimer_);
-  if (!q) { fNamaSuggest.classList.remove('show'); fNamaSuggest.innerHTML = ''; return; }
-
-  const actionCari = CURRENT_MODE === 'reliever' ? 'searchReliverAbsen' : 'searchKaryawanUntukAbsen';
-  searchDebounceTimer_ = setTimeout(() => {
-    callGas_(actionCari, { query: q }, hasil => {
-      if (!hasil || !hasil.length) {
-        fNamaSuggest.innerHTML = '<div class="suggest-empty">Nama tidak ditemukan</div>';
-        fNamaSuggest.classList.add('show');
-        return;
-      }
-      fNamaSuggest.innerHTML = hasil.map(h =>
-        `<div class="suggest-item" data-nama="${h.nama.replace(/"/g, '&quot;')}" data-perusahaan="${(h.perusahaan||'').replace(/"/g,'&quot;')}">${h.label}</div>`
-      ).join('');
-      fNamaSuggest.classList.add('show');
-    }, () => { fNamaSuggest.classList.remove('show'); });
-  }, 250);
-});
-  fNamaSuggest.addEventListener('click', function (e) {
-  const item = e.target.closest('.suggest-item[data-nama]');
-  if (!item) return;
-  fNamaInput.value = item.dataset.nama;
-  if (CURRENT_MODE === 'reliever') {
-    document.getElementById('fPerusahaan').value = item.dataset.perusahaan || '';
-  }
-  fNamaSuggest.classList.remove('show');
-  fNamaSuggest.innerHTML = '';
-});
-
-  document.addEventListener('click', function (e) {
-    if (!e.target.closest('.search-wrap')) fNamaSuggest.classList.remove('show');
-  });
+  callGas_('getKaryawanForPublicForm', {}, list => {
+    const sel = document.getElementById('fNama');
+    if (!list || !list.length) { sel.innerHTML = '<option value="">Tidak ada data karyawan</option>'; return; }
+    sel.innerHTML = '<option value="">-- Pilih Nama --</option>' +
+      list.map(n => `<option value="${n.replace(/"/g, '&quot;')}">${n}</option>`).join('');
+  }, err => { document.getElementById('fNama').innerHTML = '<option value="">Gagal memuat: ' + err.message + '</option>'; });
 
   function doLogin() {
-  const nama = document.getElementById('fNama').value.trim();
-  if (!nama) { showMsg('Ketik dan pilih nama Anda terlebih dahulu.', 'err'); return; }
+    const nama = document.getElementById('fNama').value;
+    const nik = document.getElementById('fNik').value.trim();
+    if (!nama) { showMsg('Pilih nama Anda terlebih dahulu.', 'err'); return; }
+    if (!nik) { showMsg('NIK wajib diisi.', 'err'); return; }
 
-  const btn = document.getElementById('btnLogin');
-  const teksAsli = btn.textContent;
-  btn.disabled = true; btn.textContent = 'Memeriksa...';
+    const btn = document.getElementById('btnLogin');
+    const teksAsli = btn.textContent;
+    btn.disabled = true; btn.textContent = 'Memeriksa...';
 
-  if (CURRENT_MODE === 'reliever') {
-    callGas_('verifyLoginReliever', { nama },
+    callGas_('verifyLoginAbsenOnline', { nama, nik },
       () => {
         btn.disabled = false; btn.textContent = teksAsli;
-        CURRENT_NAMA = nama;
-        CURRENT_PERUSAHAAN = document.getElementById('fPerusahaan').value.trim();
-        masukKeHome_();
+        CURRENT_NAMA = nama; CURRENT_NIK = nik;
+        const initial = nama.trim().charAt(0).toUpperCase();
+
+        document.getElementById('screenLogin').style.display = 'none';
+        document.getElementById('bottomNav').classList.add('show');
+        document.getElementById('greetName').textContent = nama;
+        document.getElementById('avatarInit').textContent = initial;
+        document.getElementById('profilNama').textContent = nama;
+        document.getElementById('profilAvatar').textContent = initial;
+        document.getElementById('profilNik').textContent = nik;
+
+        const hour = new Date().getHours();
+        document.getElementById('greetLabel').textContent =
+          hour < 11 ? 'Selamat Pagi,' : hour < 15 ? 'Selamat Siang,' : hour < 18 ? 'Selamat Sore,' : 'Selamat Malam,';
+        document.getElementById('tglHariIni').textContent =
+          new Date().toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short' });
+
+        tickClock(); setInterval(tickClock, 1000);
+        goTab('Home');
+        muatRiwayat();
+        muatJadwal();
       },
-      err => { btn.disabled = false; btn.textContent = teksAsli; showMsg('❌ ' + err.message, 'err'); }
+      err => {
+        btn.disabled = false; btn.textContent = teksAsli;
+        showMsg('❌ ' + err.message, 'err');
+      }
     );
-    return;
   }
-
-  const nik = document.getElementById('fNik').value.trim();
-  if (!nik) { showMsg('NIK wajib diisi.', 'err'); btn.disabled = false; btn.textContent = teksAsli; return; }
-
-  callGas_('verifyLoginAbsenOnline', { nama, nik },
-    () => {
-      btn.disabled = false; btn.textContent = teksAsli;
-      CURRENT_NAMA = nama; CURRENT_NIK = nik;
-      masukKeHome_();
-    },
-    err => { btn.disabled = false; btn.textContent = teksAsli; showMsg('❌ ' + err.message, 'err'); }
-  );
-}
-function masukKeHome_() {
-  const initial = CURRENT_NAMA.trim().charAt(0).toUpperCase();
-
-  document.getElementById('screenLogin').style.display = 'none';
-  document.getElementById('bottomNav').classList.add('show');
-  document.getElementById('greetName').textContent = CURRENT_NAMA;
-  document.getElementById('avatarInit').textContent = initial;
-  document.getElementById('profilNama').textContent = CURRENT_NAMA;
-  document.getElementById('profilAvatar').textContent = initial;
-
-  const hour = new Date().getHours();
-  document.getElementById('greetLabel').textContent =
-    hour < 11 ? 'Selamat Pagi,' : hour < 15 ? 'Selamat Siang,' : hour < 18 ? 'Selamat Sore,' : 'Selamat Malam,';
-  document.getElementById('tglHariIni').textContent =
-    new Date().toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short' });
-
-  tickClock(); setInterval(tickClock, 1000);
-  goTab('Home');
-
-  const navRiwayat = document.querySelector('.navbtn[data-tab="Riwayat"]');
-
-  if (CURRENT_MODE === 'reliever') {
-    document.querySelector('.home-header .role').textContent = CURRENT_PERUSAHAAN || 'Reliever';
-    document.getElementById('profilNik').textContent = '-';
-    navRiwayat.style.display = 'none';
-    document.getElementById('scheduleCardAsli').style.display = 'none';
-    document.getElementById('relieverCard').style.display = 'block';
-    muatDaftarMenggantikan_();
-  } else {
-    navRiwayat.style.display = '';
-    document.getElementById('scheduleCardAsli').style.display = 'block';
-    document.getElementById('relieverCard').style.display = 'none';
-    muatRiwayat();
-    muatJadwal();
-  }
-}
-
-function muatDaftarMenggantikan_() {
-  callGas_('getKaryawanAbsenHariIni', {}, list => {
-    const select = document.getElementById('selectMenggantikan');
-    if (!list || !list.length) {
-      select.innerHTML = '<option value="">Tidak ada karyawan Alfa/Izin/Sakit hari ini</option>';
-      return;
-    }
-    select.innerHTML = '<option value="">-- Pilih karyawan --</option>' +
-      list.map(k => `<option value="${k.nama}" data-jenis="${k.jenis}">${k.nama} (${k.jenis})</option>`).join('');
-  }, () => {
-    document.getElementById('selectMenggantikan').innerHTML = '<option value="">Gagal memuat daftar</option>';
-  });
-}
   function doLogout() {
-  document.getElementById('bottomNav').classList.remove('show');
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById('screenLogin').style.display = 'block';
-  document.getElementById('fNik').value = '';
-  document.getElementById('fPerusahaan').value = '';
-  document.querySelector('.navbtn[data-tab="Riwayat"]').style.display = '';
-  pilihMode('karyawan');
-}
+    document.getElementById('bottomNav').classList.remove('show');
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('screenLogin').style.display = 'block';
+    document.getElementById('fNik').value = '';
+  }
 
   function goTab(tab) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -637,669 +513,39 @@ function muatDaftarMenggantikan_() {
     }
     btn.textContent = 'Mengambil lokasi...';
 
-    # README — Fitur Backup Reliever (AMS Housekeeping)
-
-Panduan pemasangan fitur **Backup Reliever**: reliever/pengganti dari luar bisa absen lewat halaman Absen Online (GPS + selfie), tercatat terpisah dari absen karyawan tetap, dan terhubung ke data karyawan yang mereka gantikan.
-
----
-
-## 0. Ringkasan Arsitektur
-
-| Komponen | Nama | Fungsi |
-|---|---|---|
-| Sheet master | `DataReliever` | Daftar nama reliever yang boleh absen (diisi manual oleh admin) |
-| Sheet log | `LogAbsenOnlineReliever` | Catatan mentah tiap kali reliever absen |
-| Sheet grid | `BackupReliever` | Grid periode (pola sama Jadwal/Realisasi): siapa bertugas tanggal berapa, menggantikan siapa |
-| File backend | `24_BackupReliever.gs` | Semua fungsi server untuk fitur ini |
-| File frontend | `AbsenOnline.html` | Tab "Reliever" ditambahkan ke halaman yang sudah ada |
-| Dispatcher | `Kode.gs` (`doPost`) | 4 action baru didaftarkan di sini |
-
-Prinsip penting: **tidak ada fungsi lama yang diubah isinya** (`submitAbsenOnline`, `searchKaryawanUntukAbsen`, dll tetap apa adanya) — semua yang baru adalah fungsi/file terpisah, supaya alur karyawan tetap yang sudah stabil tidak berisiko rusak.
-
----
-
-## 1. Urutan Pemasangan
-
-Ikuti urutan ini — jangan lompat, karena langkah belakangan butuh langkah sebelumnya.
-
-### Langkah 1 — Tambah 3 baris ke `CONFIG` di `00_Config.gs`
-
-Taruh di dalam objek `CONFIG` yang sudah ada, dekat `SHEET_JAMSCAN`:
-
-```js
-SHEET_DATARELIEVER: 'DataReliever',
-SHEET_LOGABSENRELIEVER: 'LogAbsenOnlineReliever',
-SHEET_BACKUPRELIEVER: 'BackupReliever',
-```
-
-### Langkah 2 — Buat file baru `24_BackupReliever.gs`
-
-Isi lengkapnya ada di **Lampiran A** di bawah. Salin seluruhnya ke file baru ini.
-
-### Langkah 3 — Tambah 4 case baru di dispatcher `doPost()` (`Kode.gs`)
-
-Taruh dekat case `searchKaryawanAbsen` / `getRiwayatAbsen` yang sudah ada:
-
-```js
-case 'verifyLoginReliever':
-  result = verifyLoginReliever(body.nama);
-  break;
-case 'searchReliverAbsen':
-  result = searchReliverUntukAbsen(body.query);
-  break;
-case 'getKaryawanAbsenHariIni':
-  result = getKaryawanAbsenHariIni();
-  break;
-case 'submitAbsenOnlineReliever':
-  result = submitAbsenOnlineReliever(body.namaReliever, body.asalPerusahaan, body.namaDigantikan, body.jenisDigantikan, body.jenis, body.lat, body.lng, body.akurasi, body.fotoBase64);
-  break;
-```
-
-### Langkah 4 — Isi data awal `DataReliever`
-
-Fungsi `getOrCreateDataRelieverSheet_()` akan membuat sheet-nya otomatis saat pertama dipanggil, tapi sheet-nya **kosong** — tidak ada reliever yang bisa dicari sampai Anda isi manual minimal 1 baris:
-
-| Nama | Perusahaan | NoHP | Status |
-|---|---|---|---|
-| (nama reliever) | (nama perusahaan) | (opsional) | `Aktif` |
-
-Cara tercepat memunculkan sheet-nya: jalankan fungsi test di Lampiran B (`testBuatSheetBackupReliever`) sekali dari Apps Script Editor.
-
-### Langkah 5 — Terapkan ulang Web App
-
-Di Apps Script Editor: **Terapkan → Kelola Deployment → Edit (ikon pensil) → Versi: Versi Baru → Terapkan**. Tanpa ini, `Kode.gs` yang sudah diubah tidak akan aktif di URL Web App yang dipakai `AbsenOnline.html`.
-
-### Langkah 6 — Update `AbsenOnline.html`
-
-Ikuti **Lampiran C** — ada 4 bagian: CSS, HTML (2 tempat), dan JavaScript (8 potongan kode yang ditambah/diganti). Tempel satu per satu sesuai lokasi yang disebutkan.
-
-### Langkah 7 — Deploy ulang halaman Absen Online ke Netlify
-
-Sesuai cara Anda sekarang (drag & drop folder manual).
-
----
-
-## 2. Cara Tes (urutan disarankan)
-
-1. **Tes backend dulu, sebelum sentuh frontend** — jalankan fungsi-fungsi di Lampiran B satu per satu dari Apps Script Editor, pastikan tidak ada error di Log eksekusi.
-2. **Tes `getKaryawanAbsenHariIni` khusus** — kalau hasilnya kosong `[]`, cek dulu apakah tanggal hari ini memang berada di periode AKTIF (bulan/tahun sheet `Realisasi!A2` harus cocok dengan bulan/tahun sekarang). Kalau periode belum di-update, fungsi ini memang akan selalu kosong — itu bukan bug.
-3. **Baru tes dari halaman Absen Online**: buka halaman, klik tab "Reliever", cari nama yang sudah didaftarkan di `DataReliever`, pastikan dropdown "Menggantikan Siapa" terisi, lalu coba Absen Masuk dengan foto & GPS asli.
-4. **Cek hasilnya di spreadsheet**: baris baru harus muncul di `LogAbsenOnlineReliever`, dan sel di `BackupReliever` pada kolom tanggal hari ini harus terisi nama karyawan yang digantikan.
-
----
-
-## 3. Keterbatasan v1 (sudah disepakati, bukan bug)
-
-- Tab **Riwayat** disembunyikan untuk mode Reliever — backend `getRiwayatAbsen()` yang sudah ada membaca berdasarkan NIK, sedangkan reliever tidak punya NIK. Riwayat reliever bisa ditambahkan di iterasi berikutnya lewat fungsi baru `getRiwayatAbsenReliever(nama)`.
-- Belum ada menu admin "Backup Reliever" (tampilan grid di dashboard AMS) dan belum ada card Dashboard — ini tahap selanjutnya setelah fondasi ini dipastikan jalan.
-- Metrik "persentase kehadiran reliever itu sendiri" ditunda — baru bisa dihitung kalau nanti ditambah tahap "penjadwalan reliever" di depan (lihat diskusi rancangan awal).
-- Sheet `BackupReliever` **belum** ikut diarsipkan otomatis saat "Mulai Periode Baru" — perlu ditambahkan ke `resetJamKerjaJamScanForNewPeriod_` atau fungsi arsip terkait di iterasi berikutnya.
-
----
-
-## Lampiran A — Isi lengkap `24_BackupReliever.gs`
-
-```js
-/*************************************************************
- * 24_BackupReliever.gs
- * Fitur Backup Reliever: reliever (pengganti dari luar) absen lewat
- * halaman Absen Online, dicatat terpisah dari absen karyawan tetap.
- *
- * Sheet terkait:
- *  - DataReliever        : master nama reliever (Nama|Perusahaan|NoHP|Status)
- *  - LogAbsenOnlineReliever : log mentah tiap absen reliever
- *  - BackupReliever       : grid periode (pola SAMA seperti Jadwal/Realisasi,
- *                           supaya bisa dibaca readGridFromSheetObj_ yang
- *                           sudah ada). Baris = reliever, kolom = tanggal,
- *                           isi sel = nama karyawan yang digantikan.
- *************************************************************/
-
-/* ============================ SETUP SHEET ============================ */
-
-function getOrCreateDataRelieverSheet_() {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-  let sheet = ss.getSheetByName(CONFIG.SHEET_DATARELIEVER);
-  if (!sheet) {
-    sheet = ss.insertSheet(CONFIG.SHEET_DATARELIEVER);
-    sheet.getRange(1, 1, 1, 4).setValues([['Nama', 'Perusahaan', 'NoHP', 'Status']]).setFontWeight('bold');
-    sheet.setColumnWidths(1, 4, 160);
-    sheet.getRange('F1').setValue('Daftar reliever yang boleh absen lewat halaman Absen Online. Tambah baris manual di sini dulu (Status="Aktif") sebelum reliever bisa dicari di form.');
-  }
-  return sheet;
-}
-
-function getOrCreateLogAbsenRelieverSheet_() {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-  let sheet = ss.getSheetByName(CONFIG.SHEET_LOGABSENRELIEVER);
-  if (!sheet) {
-    sheet = ss.insertSheet(CONFIG.SHEET_LOGABSENRELIEVER);
-    sheet.getRange(1, 1, 1, 13).setValues([[
-      'Timestamp', 'Tanggal', 'Nama', 'AsalPerusahaan', 'NamaDigantikan', 'JenisDigantikan',
-      'Jenis', 'Jam', 'Latitude', 'Longitude', 'JarakMeter', 'Status', 'FotoUrl'
-    ]]).setFontWeight('bold');
-    sheet.hideSheet();
-  }
-  return sheet;
-}
-
-/** Grid periode untuk reliever -- strukturnya SENGAJA disamakan persis dengan
- *  Jadwal/Realisasi (No|Nama|Perusahaan di kolom A-C, HEADER_ROW/DAY_NAME_ROW/
- *  DATA_START_ROW/FIRST_DAY_COL sama persis) supaya bisa langsung dibaca pakai
- *  readGridFromSheetObj_() yang sudah ada tanpa modifikasi apa pun. */
-function getOrCreateBackupRelieverSheet_() {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-  let sheet = ss.getSheetByName(CONFIG.SHEET_BACKUPRELIEVER);
-  if (sheet) return sheet;
-
-  sheet = ss.insertSheet(CONFIG.SHEET_BACKUPRELIEVER);
-  const realisasiSheet = getSheet_(CONFIG.SHEET_REALISASI);
-  const dayCount = getDayColCount_(realisasiSheet);
-
-  sheet.getRange(1, 1, 1, 3).setValues([['No', 'Nama Reliever', 'Perusahaan']]).setFontWeight('bold');
-  sheet.getRange(2, 1).setValue(realisasiSheet.getRange(2, 1).getValue()); // samakan label periode
-
-  if (dayCount > 0) {
-    sheet.getRange(CONFIG.HEADER_ROW, CONFIG.FIRST_DAY_COL, 1, dayCount)
-      .setValues(realisasiSheet.getRange(CONFIG.HEADER_ROW, CONFIG.FIRST_DAY_COL, 1, dayCount).getValues());
-    sheet.getRange(CONFIG.DAY_NAME_ROW, CONFIG.FIRST_DAY_COL, 1, dayCount)
-      .setValues(realisasiSheet.getRange(CONFIG.DAY_NAME_ROW, CONFIG.FIRST_DAY_COL, 1, dayCount).getValues());
-  }
-
-  sheet.hideSheet();
-  return sheet;
-}
-
-/** Cari baris reliever berdasarkan nama; kalau belum ada, tambah baris baru di akhir. */
-function getOrCreateReliverRow_(sheet, nama, perusahaan) {
-  const lastRow = getLastEmployeeRow_(sheet);
-  const numRows = lastRow - CONFIG.DATA_START_ROW + 1;
-
-  if (numRows > 0) {
-    const names = sheet.getRange(CONFIG.DATA_START_ROW, 2, numRows, 1).getValues()
-      .map(r => String(r[0] || '').trim().toLowerCase());
-    const idx = names.indexOf(nama.trim().toLowerCase());
-    if (idx !== -1) return CONFIG.DATA_START_ROW + idx;
-  }
-
-  const newRow = lastRow + 1;
-  const newNo = numRows + 1;
-  sheet.getRange(newRow, 1, 1, 3).setValues([[newNo, nama, perusahaan || '']]);
-  return newRow;
-}
-
-/* ============================ VERIFIKASI & PENCARIAN (PUBLIK) ============================ */
-
-function verifyReliverByNama_(nama) {
-  const sheet = getOrCreateDataRelieverSheet_();
-  const lastRow = sheet.getLastRow();
-  if (lastRow < 2) throw new Error('Belum ada reliever terdaftar. Hubungi admin.');
-
-  const data = sheet.getRange(2, 1, lastRow - 1, 4).getValues();
-  const row = data.find(r => String(r[0] || '').trim().toLowerCase() === String(nama || '').trim().toLowerCase());
-  if (!row) throw new Error('Nama reliever "' + nama + '" belum terdaftar. Hubungi admin untuk didaftarkan dulu.');
-  if (String(row[3] || '').trim() === 'Nonaktif') throw new Error('Reliever "' + nama + '" berstatus nonaktif.');
-
-  return { nama: row[0], perusahaan: row[1], noHp: row[2] };
-}
-
-function verifyLoginReliever(nama) {
-  verifyReliverByNama_(nama);
-  return { success: true };
-}
-
-/** Autocomplete nama reliever di form Absen Online, mirip searchKaryawanUntukAbsen. */
-function searchReliverUntukAbsen(query) {
-  query = String(query || '').trim().toLowerCase();
-  if (!query) return [];
-
-  const sheet = getOrCreateDataRelieverSheet_();
-  const lastRow = sheet.getLastRow();
-  if (lastRow < 2) return [];
-
-  const data = sheet.getRange(2, 1, lastRow - 1, 2).getValues();
-  const results = [];
-  data.forEach(row => {
-    const nama = String(row[0] || '').trim();
-    const perusahaan = String(row[1] || '').trim();
-    if (!nama) return;
-    const namaLower = nama.toLowerCase();
-    let score = -1;
-    if (namaLower === query) score = 100;
-    else if (namaLower.startsWith(query)) score = 80;
-    else if (namaLower.includes(query)) score = 50;
-    if (score > -1) results.push({ nama, perusahaan, score });
-  });
-
-  results.sort((a, b) => b.score - a.score || a.nama.localeCompare(b.nama));
-  return results.slice(0, 10).map(r => ({ nama: r.nama, perusahaan: r.perusahaan, label: r.nama + ' - ' + r.perusahaan }));
-}
-
-/** Dropdown "menggantikan siapa hari ini?" -- scan kolom Realisasi HARI INI, ambil yg A/I/S. */
-function getKaryawanAbsenHariIni() {
-  const realisasiSheet = getSheet_(CONFIG.SHEET_REALISASI);
-  const periodText = String(realisasiSheet.getRange(2, 1).getValue() || '').trim();
-  const my = parsePeriodMonthYear_(periodText);
-  if (!my) return [];
-
-  const today = new Date();
-  if (today.getFullYear() !== my.year || today.getMonth() !== my.monthIndex) return [];
-
-  const dayCount = getDayColCount_(realisasiSheet);
-  const dayNum = today.getDate();
-  if (dayNum > dayCount) return [];
-
-  const lastRow = getLastEmployeeRow_(realisasiSheet);
-  const numRows = lastRow - CONFIG.DATA_START_ROW + 1;
-  if (numRows <= 0) return [];
-
-  const col = CONFIG.FIRST_DAY_COL + (dayNum - 1);
-  const names = realisasiSheet.getRange(CONFIG.DATA_START_ROW, 2, numRows, 1).getValues();
-  const codes = realisasiSheet.getRange(CONFIG.DATA_START_ROW, col, numRows, 1).getValues();
-
-  const result = [];
-  for (let i = 0; i < numRows; i++) {
-    const nama = String(names[i][0] || '').trim();
-    const kode = String(codes[i][0] || '').trim().toUpperCase();
-    if (nama && (kode === 'A' || kode === 'I' || kode === 'S')) {
-      const info = CONFIG.STATUS_CODES[kode];
-      result.push({ nama: nama, jenis: info ? info.label : kode });
-    }
-  }
-  return result;
-}
-
-/* ============================ SUBMIT ABSEN RELIEVER (PUBLIK) ============================ */
-
-function submitAbsenOnlineReliever(namaReliever, asalPerusahaan, namaDigantikan, jenisDigantikan, jenis, lat, lng, akurasi, fotoBase64) {
-  namaReliever = String(namaReliever || '').trim();
-  asalPerusahaan = String(asalPerusahaan || '').trim();
-  namaDigantikan = String(namaDigantikan || '').trim();
-  jenisDigantikan = String(jenisDigantikan || '').trim();
-  jenis = String(jenis || '').trim();
-  lat = Number(lat); lng = Number(lng);
-
-  if (!namaReliever) throw new Error('Nama reliever wajib diisi.');
-  if (!namaDigantikan) throw new Error('Wajib pilih karyawan yang digantikan.');
-  if (jenis !== 'Masuk' && jenis !== 'Pulang') throw new Error('Jenis absen tidak valid.');
-  if (isNaN(lat) || isNaN(lng)) throw new Error('Data lokasi GPS tidak valid.');
-  if (!fotoBase64) throw new Error('Foto selfie wajib diambil sebelum absen.');
-
-  const reliver = verifyReliverByNama_(namaReliever);
-  if (!asalPerusahaan) asalPerusahaan = reliver.perusahaan;
-
-  const lokasi = getSettingLokasiAbsen_();
-  const jarak = haversineDistanceMeter_(lat, lng, lokasi.lat, lokasi.lng);
-  const status = jarak <= lokasi.radius ? 'Valid' : 'Di Luar Radius';
-
-  const now = new Date();
-  const tz = Session.getScriptTimeZone() || 'GMT+7';
-  const jamStr = Utilities.formatDate(now, tz, 'HH:mm');
-  const tanggalStr = Utilities.formatDate(now, tz, 'dd/MM/yyyy');
-
-  let fotoUrl = '';
-  try {
-    const folder = getOrCreateFotoAbsenBulanFolder_(now.getFullYear(), now.getMonth() + 1);
-    const namaFile = 'RELIEVER_' + namaReliever.replace(/[^\w]+/g, '_') + '_' + jenis + '_' +
-      Utilities.formatDate(now, tz, 'yyyyMMdd_HHmmss') + '.jpg';
-    const rawBase64 = fotoBase64.replace(/^data:image\/\w+;base64,/, '');
-    const bytes = Utilities.base64Decode(rawBase64);
-    const blob = Utilities.newBlob(bytes, 'image/jpeg', namaFile);
-    fotoUrl = folder.createFile(blob).getUrl();
-  } catch (e) {
-    Logger.log('Gagal simpan foto absen reliever untuk ' + namaReliever + ': ' + e.message);
-  }
-
-  const lock = LockService.getScriptLock();
-  lock.waitLock(15000);
-  try {
-    getOrCreateLogAbsenRelieverSheet_().appendRow([
-      now, tanggalStr, namaReliever, asalPerusahaan, namaDigantikan, jenisDigantikan,
-      jenis, jamStr, lat, lng, jarak, status, fotoUrl
-    ]);
-
-    // Tandai grid BackupReliever hanya saat absen Masuk.
-    if (jenis === 'Masuk') {
-      const grid = getOrCreateBackupRelieverSheet_();
-      const row = getOrCreateReliverRow_(grid, namaReliever, asalPerusahaan);
-      const dayCount = getDayColCount_(grid);
-      const dayIdx = now.getDate() - 1;
-      if (dayIdx >= 0 && dayIdx < dayCount) {
-        grid.getRange(row, CONFIG.FIRST_DAY_COL + dayIdx).setValue(namaDigantikan);
-      }
-    }
-
-    SpreadsheetApp.flush();
-  } finally {
-    lock.releaseLock();
-  }
-
-  return { status: status, jam: jamStr, jarak: jarak };
-}
-```
-
----
-
-## Lampiran B — Fungsi tes (opsional, boleh dihapus setelah selesai testing)
-
-Tempel di bagian paling bawah `24_BackupReliever.gs`:
-
-```js
-function testBuatSheetBackupReliever() {
-  const sheet = getOrCreateBackupRelieverSheet_();
-  Logger.log('Sheet berhasil dibuat/ditemukan: ' + sheet.getName());
-  Logger.log('Isi baris 4 (header tanggal): ' + JSON.stringify(sheet.getRange(4, 1, 1, 10).getValues()));
-  Logger.log('Isi baris 5 (nama hari): ' + JSON.stringify(sheet.getRange(5, 1, 1, 10).getValues()));
-}
-
-function testGetKaryawanAbsenHariIni() {
-  const hasil = getKaryawanAbsenHariIni();
-  Logger.log('Jumlah karyawan A/I/S hari ini: ' + hasil.length);
-  Logger.log(JSON.stringify(hasil));
-}
-```
-
----
-
-## Lampiran C — Perubahan `AbsenOnline.html`
-
-### C1. CSS — tambahkan di dalam `<style>`, dekat `.chip`
-
-```css
-.mode-btn {
-  flex:1; padding:10px; border-radius:10px; border:1px solid rgba(255,255,255,.25);
-  background: rgba(255,255,255,.08); color: rgba(255,255,255,.7); font-weight:600;
-  font-size:12.5px; cursor:pointer; font-family:'Inter';
-}
-.mode-btn.active { background:#fff; color: var(--navy); border-color:#fff; }
-```
-
-### C2. HTML — bagian `#screenLogin`
-
-Tambahkan toggle mode SEBELUM `<p class="welcome">`, beri `id="fieldNik"` pada field NIK yang sudah ada, dan tambahkan field Perusahaan baru:
-
-```html
-<div class="brand">AMS Housekeeping</div>
-
-<div style="display:flex;gap:8px;margin-bottom:18px;">
-  <button type="button" class="mode-btn active" id="btnModeKaryawan" onclick="pilihMode('karyawan')">Karyawan Tetap</button>
-  <button type="button" class="mode-btn" id="btnModeReliever" onclick="pilihMode('reliever')">Reliever</button>
-</div>
-
-<p class="welcome">Selamat Datang<br>di Absensi Online</p>
-
-<div class="field search-wrap">
-  <label>Nama</label>
-  <input type="text" id="fNama" placeholder="Ketik nama Anda..." autocomplete="off">
-  <div class="suggest-list" id="fNamaSuggest"></div>
-</div>
-
-<div class="field" id="fieldNik">
-  <label>NIK</label>
-  <input type="text" id="fNik" placeholder="Masukkan NIK Anda">
-  <div class="login-hint">NIK harus sama persis dengan data di HR.</div>
-</div>
-
-<div class="field" id="fieldPerusahaan" style="display:none;">
-  <label>Perusahaan</label>
-  <input type="text" id="fPerusahaan" placeholder="Otomatis terisi setelah pilih nama" readonly>
-</div>
-
-<button class="btn-primary" id="btnLogin" onclick="doLogin()">Masuk</button>
-```
-
-### C3. HTML — bagian `#screenHome`
-
-Beri `id="scheduleCardAsli"` pada `<div class="schedule-card">` yang sudah ada, lalu tambahkan card baru PERSIS SETELAHNYA:
-
-```html
-<div class="schedule-card" id="scheduleCardAsli">
-  <!-- isi persis seperti sebelumnya, TIDAK diubah -->
-</div>
-
-<div class="schedule-card" id="relieverCard" style="display:none;">
-  <div class="row-top">
-    <span class="lbl">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#14316B" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
-      Menggantikan Siapa?
-    </span>
-  </div>
-  <select id="selectMenggantikan" style="width:100%;padding:12px;border-radius:10px;border:1px solid var(--line);font-size:13.5px;margin-top:8px;">
-    <option value="">Memuat daftar...</option>
-  </select>
-  <div class="btn-row" style="margin-top:14px;">
-    <button class="btn-primary" id="btnAbsenMasukReliever" onclick="submitAbsen('Masuk')">Absen Masuk</button>
-    <button class="btn-primary btn-outline" id="btnAbsenPulangReliever" onclick="submitAbsen('Pulang')">Absen Pulang</button>
-  </div>
-</div>
-```
-
-### C4. JavaScript — 8 potongan
-
-**(a) Variabel global baru** — taruh dekat `let CURRENT_NAMA = ...`:
-```js
-let CURRENT_MODE = 'karyawan';
-let CURRENT_PERUSAHAAN = '';
-```
-
-**(b) Fungsi baru `pilihMode`:**
-```js
-function pilihMode(mode) {
-  CURRENT_MODE = mode;
-  document.getElementById('btnModeKaryawan').classList.toggle('active', mode === 'karyawan');
-  document.getElementById('btnModeReliever').classList.toggle('active', mode === 'reliever');
-  document.getElementById('fieldNik').style.display = mode === 'karyawan' ? 'block' : 'none';
-  document.getElementById('fieldPerusahaan').style.display = mode === 'reliever' ? 'block' : 'none';
-  document.getElementById('fNama').value = '';
-  document.getElementById('fNik').value = '';
-  document.getElementById('fPerusahaan').value = '';
-  fNamaSuggest.classList.remove('show');
-}
-```
-
-**(c) Ganti seluruh `fNamaInput.addEventListener('input', ...)`:**
-```js
-fNamaInput.addEventListener('input', function () {
-  const q = this.value.trim();
-  clearTimeout(searchDebounceTimer_);
-  if (!q) { fNamaSuggest.classList.remove('show'); fNamaSuggest.innerHTML = ''; return; }
-
-  const actionCari = CURRENT_MODE === 'reliever' ? 'searchReliverAbsen' : 'searchKaryawanUntukAbsen';
-  searchDebounceTimer_ = setTimeout(() => {
-    callGas_(actionCari, { query: q }, hasil => {
-      if (!hasil || !hasil.length) {
-        fNamaSuggest.innerHTML = '<div class="suggest-empty">Nama tidak ditemukan</div>';
-        fNamaSuggest.classList.add('show');
-        return;
-      }
-      fNamaSuggest.innerHTML = hasil.map(h =>
-        `<div class="suggest-item" data-nama="${h.nama.replace(/"/g, '&quot;')}" data-perusahaan="${(h.perusahaan||'').replace(/"/g,'&quot;')}">${h.label}</div>`
-      ).join('');
-      fNamaSuggest.classList.add('show');
-    }, () => { fNamaSuggest.classList.remove('show'); });
-  }, 250);
-});
-```
-
-**(d) Ganti `fNamaSuggest.addEventListener('click', ...)`:**
-```js
-fNamaSuggest.addEventListener('click', function (e) {
-  const item = e.target.closest('.suggest-item[data-nama]');
-  if (!item) return;
-  fNamaInput.value = item.dataset.nama;
-  if (CURRENT_MODE === 'reliever') {
-    document.getElementById('fPerusahaan').value = item.dataset.perusahaan || '';
-  }
-  fNamaSuggest.classList.remove('show');
-  fNamaSuggest.innerHTML = '';
-});
-```
-
-**(e) Ganti seluruh fungsi `doLogin()`:**
-```js
-function doLogin() {
-  const nama = document.getElementById('fNama').value.trim();
-  if (!nama) { showMsg('Ketik dan pilih nama Anda terlebih dahulu.', 'err'); return; }
-
-  const btn = document.getElementById('btnLogin');
-  const teksAsli = btn.textContent;
-  btn.disabled = true; btn.textContent = 'Memeriksa...';
-
-  if (CURRENT_MODE === 'reliever') {
-    callGas_('verifyLoginReliever', { nama },
-      () => {
-        btn.disabled = false; btn.textContent = teksAsli;
-        CURRENT_NAMA = nama;
-        CURRENT_PERUSAHAAN = document.getElementById('fPerusahaan').value.trim();
-        masukKeHome_();
+    navigator.geolocation.getCurrentPosition(
+      pos => {
+        const lat = pos.coords.latitude, lng = pos.coords.longitude, akurasi = Math.round(pos.coords.accuracy);
+        btn.textContent = 'Mengirim...';
+        callGas_('submitAbsenOnline', { nama: CURRENT_NAMA, nik: CURRENT_NIK, jenis, lat, lng, akurasi, fotoBase64 },
+          data => {
+            btn.disabled = false; btn.textContent = teksAsli;
+            if (data.status === 'Valid') showMsg(`✅ Absen ${jenis} berhasil pukul ${data.jam}.`, 'ok');
+            else showMsg(`⚠️ Absen tercatat, di luar radius (${data.jarak}m). Akan direview admin.`, 'warn');
+            muatRiwayat();
+          },
+          err => { btn.disabled = false; btn.textContent = teksAsli; showMsg('❌ ' + err.message, 'err'); }
+        );
       },
-      err => { btn.disabled = false; btn.textContent = teksAsli; showMsg('❌ ' + err.message, 'err'); }
+      err => {
+        btn.disabled = false; btn.textContent = teksAsli;
+        let pesan = 'Gagal mengambil lokasi GPS.';
+        if (err.code === err.PERMISSION_DENIED) pesan = 'Izin lokasi ditolak. Aktifkan izin lokasi di browser.';
+        else if (err.code === err.TIMEOUT) pesan = 'Waktu pengambilan lokasi habis, coba lagi.';
+        showMsg('❌ ' + pesan, 'err');
+      },
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
     );
-    return;
   }
-
-  const nik = document.getElementById('fNik').value.trim();
-  if (!nik) { showMsg('NIK wajib diisi.', 'err'); btn.disabled = false; btn.textContent = teksAsli; return; }
-
-  callGas_('verifyLoginAbsenOnline', { nama, nik },
-    () => {
-      btn.disabled = false; btn.textContent = teksAsli;
-      CURRENT_NAMA = nama; CURRENT_NIK = nik;
-      masukKeHome_();
-    },
-    err => { btn.disabled = false; btn.textContent = teksAsli; showMsg('❌ ' + err.message, 'err'); }
-  );
-}
-```
-
-**(f) Fungsi baru `masukKeHome_` dan `muatDaftarMenggantikan_`:**
-```js
-function masukKeHome_() {
-  const initial = CURRENT_NAMA.trim().charAt(0).toUpperCase();
-
-  document.getElementById('screenLogin').style.display = 'none';
-  document.getElementById('bottomNav').classList.add('show');
-  document.getElementById('greetName').textContent = CURRENT_NAMA;
-  document.getElementById('avatarInit').textContent = initial;
-  document.getElementById('profilNama').textContent = CURRENT_NAMA;
-  document.getElementById('profilAvatar').textContent = initial;
-
-  const hour = new Date().getHours();
-  document.getElementById('greetLabel').textContent =
-    hour < 11 ? 'Selamat Pagi,' : hour < 15 ? 'Selamat Siang,' : hour < 18 ? 'Selamat Sore,' : 'Selamat Malam,';
-  document.getElementById('tglHariIni').textContent =
-    new Date().toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short' });
-
-  tickClock(); setInterval(tickClock, 1000);
-  goTab('Home');
-
-  const navRiwayat = document.querySelector('.navbtn[data-tab="Riwayat"]');
-
-  if (CURRENT_MODE === 'reliever') {
-    document.querySelector('.home-header .role').textContent = CURRENT_PERUSAHAAN || 'Reliever';
-    document.getElementById('profilNik').textContent = '-';
-    navRiwayat.style.display = 'none';
-    document.getElementById('scheduleCardAsli').style.display = 'none';
-    document.getElementById('relieverCard').style.display = 'block';
-    muatDaftarMenggantikan_();
-  } else {
-    navRiwayat.style.display = '';
-    document.getElementById('scheduleCardAsli').style.display = 'block';
-    document.getElementById('relieverCard').style.display = 'none';
-    muatRiwayat();
-    muatJadwal();
+</script>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js')
+        .then(() => console.log('Service worker terdaftar'))
+        .catch((err) => console.log('Gagal daftar service worker:', err));
+    });
   }
-}
-
-function muatDaftarMenggantikan_() {
-  callGas_('getKaryawanAbsenHariIni', {}, list => {
-    const select = document.getElementById('selectMenggantikan');
-    if (!list || !list.length) {
-      select.innerHTML = '<option value="">Tidak ada karyawan Alfa/Izin/Sakit hari ini</option>';
-      return;
-    }
-    select.innerHTML = '<option value="">-- Pilih karyawan --</option>' +
-      list.map(k => `<option value="${k.nama}" data-jenis="${k.jenis}">${k.nama} (${k.jenis})</option>`).join('');
-  }, () => {
-    document.getElementById('selectMenggantikan').innerHTML = '<option value="">Gagal memuat daftar</option>';
-  });
-}
-```
-
-**(g) Ganti fungsi `doLogout()`:**
-```js
-function doLogout() {
-  document.getElementById('bottomNav').classList.remove('show');
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById('screenLogin').style.display = 'block';
-  document.getElementById('fNik').value = '';
-  document.getElementById('fPerusahaan').value = '';
-  document.querySelector('.navbtn[data-tab="Riwayat"]').style.display = '';
-  pilihMode('karyawan');
-}
-```
-
-**(h) Ganti callback `pos =>` di dalam `lanjutkanAbsenDenganFoto_` (bagian `navigator.geolocation.getCurrentPosition`):**
-```js
-navigator.geolocation.getCurrentPosition(
-  pos => {
-    const lat = pos.coords.latitude, lng = pos.coords.longitude, akurasi = Math.round(pos.coords.accuracy);
-    btn.textContent = 'Mengirim...';
-
-    if (CURRENT_MODE === 'reliever') {
-      const select = document.getElementById('selectMenggantikan');
-      const namaDigantikan = select.value;
-      const jenisDigantikan = select.selectedOptions[0] ? select.selectedOptions[0].dataset.jenis : '';
-      if (!namaDigantikan) {
-        btn.disabled = false; btn.textContent = teksAsli;
-        showMsg('Pilih dulu karyawan yang digantikan.', 'err');
-        return;
-      }
-      callGas_('submitAbsenOnlineReliever', {
-        namaReliever: CURRENT_NAMA, asalPerusahaan: CURRENT_PERUSAHAAN,
-        namaDigantikan, jenisDigantikan, jenis, lat, lng, akurasi, fotoBase64
-      },
-        data => {
-          btn.disabled = false; btn.textContent = teksAsli;
-          if (data.status === 'Valid') showMsg(`✅ Absen reliever ${jenis} berhasil pukul ${data.jam}.`, 'ok');
-          else showMsg(`⚠️ Absen tercatat, di luar radius (${data.jarak}m).`, 'warn');
-        },
-        err => { btn.disabled = false; btn.textContent = teksAsli; showMsg('❌ ' + err.message, 'err'); }
-      );
-      return;
-    }
-
-    // alur karyawan tetap -- SAMA PERSIS seperti sebelumnya, tidak diubah
-    callGas_('submitAbsenOnline', { nama: CURRENT_NAMA, nik: CURRENT_NIK, jenis, lat, lng, akurasi, fotoBase64 },
-      data => {
-        btn.disabled = false; btn.textContent = teksAsli;
-        if (data.status === 'Valid') showMsg(`✅ Absen ${jenis} berhasil pukul ${data.jam}.`, 'ok');
-        else showMsg(`⚠️ Absen tercatat, di luar radius (${data.jarak}m). Akan direview admin.`, 'warn');
-        muatRiwayat();
-      },
-      err => { btn.disabled = false; btn.textContent = teksAsli; showMsg('❌ ' + err.message, 'err'); }
-    );
-  },
-  err => {
-    btn.disabled = false; btn.textContent = teksAsli;
-    let pesan = 'Gagal mengambil lokasi GPS.';
-    if (err.code === err.PERMISSION_DENIED) pesan = 'Izin lokasi ditolak. Aktifkan izin lokasi di browser.';
-    else if (err.code === err.TIMEOUT) pesan = 'Waktu pengambilan lokasi habis, coba lagi.';
-    showMsg('❌ ' + pesan, 'err');
-  },
-  { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
-);
-```
-  function pilihMode(mode) {
-  CURRENT_MODE = mode;
-  document.getElementById('btnModeKaryawan').classList.toggle('active', mode === 'karyawan');
-  document.getElementById('btnModeReliever').classList.toggle('active', mode === 'reliever');
-  document.getElementById('fieldNik').style.display = mode === 'karyawan' ? 'block' : 'none';
-  document.getElementById('fieldPerusahaan').style.display = mode === 'reliever' ? 'block' : 'none';
-  document.getElementById('fNama').value = '';
-  document.getElementById('fNik').value = '';
-  document.getElementById('fPerusahaan').value = '';
-  fNamaSuggest.classList.remove('show');
-}
 </script>
 </body>
 </html>
