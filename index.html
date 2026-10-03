@@ -61,6 +61,17 @@
   .btn-primary:disabled { opacity: .55; cursor: default; box-shadow: none; }
   .login-hint { font-size: 11px; color: rgba(255,255,255,.5); margin-top: 6px; }
 
+  .search-wrap { position: relative; }
+  .suggest-list {
+    position: absolute; top: calc(100% + 4px); left: 0; right: 0; z-index: 30;
+    background: #fff; border-radius: 12px; box-shadow: 0 10px 24px rgba(0,0,0,.18);
+    max-height: 220px; overflow-y: auto; display: none;
+  }
+  .suggest-list.show { display: block; }
+  .suggest-item { padding: 11px 14px; font-size: 13.5px; color: var(--ink); cursor: pointer; }
+  .suggest-item:hover, .suggest-item.hl { background: #F2F3FB; }
+  .suggest-empty { padding: 11px 14px; font-size: 13px; color: var(--muted); }
+
   /* ---------- TABS ---------- */
   .screen { display: none; }
   .screen.active { display: block; animation: fadeIn .18s ease; }
@@ -79,8 +90,9 @@
   .avatar {
     width: 42px; height: 42px; border-radius: 13px; background: linear-gradient(135deg, var(--purple-a), var(--purple-b));
     display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 15px; flex-shrink: 0;
-    font-family: 'Poppins';
+    font-family: 'Poppins'; overflow: hidden;
   }
+  .avatar img, .profil-avatar img { width: 100%; height: 100%; object-fit: cover; }
 
   .schedule-card {
     background: #fff; border-radius: 20px; box-shadow: 0 16px 34px rgba(11,27,66,.16);
@@ -137,11 +149,18 @@
 
   /* ---------- PROFIL TAB ---------- */
   .profil-head { text-align: center; padding: 34px 20px 20px; }
+  .avatar-wrap { position: relative; width: 70px; margin: 0 auto 14px; }
   .profil-avatar {
-    width: 70px; height: 70px; border-radius: 20px; margin: 0 auto 14px; font-family: 'Poppins';
+    width: 70px; height: 70px; border-radius: 20px; font-family: 'Poppins';
     background: linear-gradient(135deg, var(--purple-a), var(--purple-b)); color: #fff; font-size: 26px; font-weight: 700;
-    display: flex; align-items: center; justify-content: center;
+    display: flex; align-items: center; justify-content: center; overflow: hidden;
   }
+  .avatar-edit-btn {
+    position: absolute; bottom: -3px; right: -3px; width: 26px; height: 26px; border-radius: 50%;
+    background: var(--navy); border: 2px solid #fff; display: flex; align-items: center; justify-content: center;
+    cursor: pointer; padding: 0;
+  }
+  .avatar-edit-btn:disabled { opacity: .6; cursor: default; }
   .profil-head .nm { font-family: 'Poppins'; font-size: 17px; font-weight: 700; }
   .profil-head .dept { font-size: 12.5px; color: var(--muted); margin-top: 2px; }
   .info-list { padding: 8px 18px 0; }
@@ -175,8 +194,6 @@
   .msg.ok { background: var(--ok-bg); color: var(--ok); display: block; }
   .msg.warn { background: var(--warn-bg); color: var(--warn); display: block; }
 </style>
- <link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#1e3a5f">
 </head>
 <body>
 <div class="app" id="appRoot">
@@ -191,9 +208,10 @@
       <div class="brand">AMS Housekeeping</div>
       <p class="welcome">Selamat Datang<br>di Absensi Online</p>
 
-      <div class="field">
+      <div class="field search-wrap">
         <label>Nama</label>
-        <select id="fNama"><option value="">Memuat daftar nama...</option></select>
+        <input type="text" id="fNama" placeholder="Ketik nama Anda..." autocomplete="off">
+        <div class="suggest-list" id="fNamaSuggest"></div>
       </div>
       <div class="field">
         <label>NIK</label>
@@ -216,7 +234,7 @@
         <div>
           <p class="greet-label" id="greetLabel">Selamat Pagi,</p>
           <p class="greet-name" id="greetName">-</p>
-          <p class="role">Departemen Housekeeping</p>
+          <p class="role" id="roleLabel">-</p>
         </div>
         <div class="avatar" id="avatarInit">-</div>
       </div>
@@ -267,13 +285,19 @@
   <!-- ===== PROFIL ===== -->
   <div id="screenProfil" class="screen">
     <div class="profil-head">
-      <div class="profil-avatar" id="profilAvatar">-</div>
+      <div class="avatar-wrap">
+        <div class="profil-avatar" id="profilAvatar">-</div>
+        <button class="avatar-edit-btn" id="btnEditFoto" onclick="triggerPilihFotoProfil()" title="Ganti foto profil">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+        </button>
+      </div>
       <div class="nm" id="profilNama">-</div>
-      <div class="dept">Departemen Housekeeping</div>
+      <div class="dept" id="profilDept">-</div>
     </div>
+    <input type="file" accept="image/*" id="inputFotoProfil" style="display:none;">
     <div class="info-list">
       <div class="info-row"><span class="k">NIK</span><span class="v" id="profilNik">-</span></div>
-      <div class="info-row"><span class="k">Perusahaan</span><span class="v">PT Swadharma Primautama</span></div>
+      <div class="info-row"><span class="k">Department</span><span class="v" id="profilPerusahaan">-</span></div>
       <div class="info-row"><span class="k">Jadwal Kerja</span><span class="v" id="profilJadwal">-</span></div>
     </div>
     <button class="btn-logout" onclick="doLogout()">Keluar</button>
@@ -302,7 +326,7 @@
   // WAJIB DIISI: URL hasil Deploy > Manage deployments > Web app di Apps Script Editor.
   const GAS_WEBAPP_URL_ = 'https://script.google.com/macros/s/AKfycbwh9YcVNmGKG5sNIJ2oZ-DXH0XjOa7NF9H649Z7POe16gc2wXFM-R3lpdKZVsroXcO7oA/exec';
 
-  let CURRENT_NAMA = '', CURRENT_NIK = '', RIWAYAT_CACHE = [], ACTIVE_FILTER = 'Semua';
+  let CURRENT_NAMA = '', CURRENT_NIK = '', CURRENT_DEPARTMENT = '', CURRENT_FOTO_PROFIL_URL = '', RIWAYAT_CACHE = [], ACTIVE_FILTER = 'Semua';
 
   function callGas_(action, body, onSuccess, onFailure) {
     body.action = action;
@@ -323,17 +347,81 @@
     if (text) setTimeout(() => { box.style.display = 'none'; }, 4500);
   }
 
-  callGas_('getKaryawanForPublicForm', {}, list => {
-    const sel = document.getElementById('fNama');
-    if (!list || !list.length) { sel.innerHTML = '<option value="">Tidak ada data karyawan</option>'; return; }
-    sel.innerHTML = '<option value="">-- Pilih Nama --</option>' +
-      list.map(n => `<option value="${n.replace(/"/g, '&quot;')}">${n}</option>`).join('');
-  }, err => { document.getElementById('fNama').innerHTML = '<option value="">Gagal memuat: ' + err.message + '</option>'; });
+  // ---- Cache daftar nama karyawan sekali di awal, lalu filter di browser (instan, tanpa lag) ----
+  let ALL_NAMA_LIST = [];
+  let searchDebounceTimer_ = null;
+  const fNamaInput = document.getElementById('fNama');
+  const fNamaSuggest = document.getElementById('fNamaSuggest');
+
+  function muatDaftarNamaKaryawan_(attempt) {
+    attempt = attempt || 1;
+    callGas_('getKaryawanForPublicForm', {}, list => {
+      ALL_NAMA_LIST = list || [];
+    }, () => {
+      // Google Apps Script kadang gagal karena redirect internal kehilangan header CORS
+      // (bug dikenal, sifatnya acak) — coba ulang beberapa kali sebelum menyerah.
+      if (attempt < 3) {
+        setTimeout(() => muatDaftarNamaKaryawan_(attempt + 1), 900);
+      }
+    });
+  }
+  muatDaftarNamaKaryawan_();
+
+  function renderSuggestFromNames_(namaList) {
+    if (!namaList.length) {
+      fNamaSuggest.innerHTML = '<div class="suggest-empty">Nama tidak ditemukan</div>';
+      fNamaSuggest.classList.add('show');
+      return;
+    }
+    fNamaSuggest.innerHTML = namaList.map(n =>
+      `<div class="suggest-item" data-nama="${n.replace(/"/g, '&quot;')}">${n}</div>`
+    ).join('');
+    fNamaSuggest.classList.add('show');
+  }
+
+  fNamaInput.addEventListener('input', function () {
+    const qRaw = this.value.trim();
+    const q = qRaw.toLowerCase();
+    clearTimeout(searchDebounceTimer_);
+    if (!q) { fNamaSuggest.classList.remove('show'); fNamaSuggest.innerHTML = ''; return; }
+
+    if (ALL_NAMA_LIST.length) {
+      // Cache tersedia -> filter instan di browser, tanpa ke server.
+      const hasil = ALL_NAMA_LIST
+        .filter(n => n.toLowerCase().includes(q))
+        .sort((a, b) => {
+          const aMulai = a.toLowerCase().startsWith(q) ? 0 : 1;
+          const bMulai = b.toLowerCase().startsWith(q) ? 0 : 1;
+          return aMulai - bMulai || a.localeCompare(b);
+        })
+        .slice(0, 10);
+      renderSuggestFromNames_(hasil);
+    } else {
+      // Fallback: cache belum/gagal termuat -> cari lewat server (lebih lambat, tapi tetap jalan).
+      searchDebounceTimer_ = setTimeout(() => {
+        callGas_('searchKaryawanUntukAbsen', { query: qRaw }, hasil => {
+          renderSuggestFromNames_((hasil || []).map(h => h.nama));
+        }, () => { fNamaSuggest.classList.remove('show'); });
+      }, 250);
+    }
+  });
+
+  fNamaSuggest.addEventListener('click', function (e) {
+    const item = e.target.closest('.suggest-item[data-nama]');
+    if (!item) return;
+    fNamaInput.value = item.dataset.nama;
+    fNamaSuggest.classList.remove('show');
+    fNamaSuggest.innerHTML = '';
+  });
+
+  document.addEventListener('click', function (e) {
+    if (!e.target.closest('.search-wrap')) fNamaSuggest.classList.remove('show');
+  });
 
   function doLogin() {
-    const nama = document.getElementById('fNama').value;
+    const nama = document.getElementById('fNama').value.trim();
     const nik = document.getElementById('fNik').value.trim();
-    if (!nama) { showMsg('Pilih nama Anda terlebih dahulu.', 'err'); return; }
+    if (!nama) { showMsg('Ketik dan pilih nama Anda terlebih dahulu.', 'err'); return; }
     if (!nik) { showMsg('NIK wajib diisi.', 'err'); return; }
 
     const btn = document.getElementById('btnLogin');
@@ -341,18 +429,22 @@
     btn.disabled = true; btn.textContent = 'Memeriksa...';
 
     callGas_('verifyLoginAbsenOnline', { nama, nik },
-      () => {
+      (data) => {
         btn.disabled = false; btn.textContent = teksAsli;
         CURRENT_NAMA = nama; CURRENT_NIK = nik;
+        CURRENT_DEPARTMENT = (data && data.department) ? data.department : '-';
+        CURRENT_FOTO_PROFIL_URL = (data && data.fotoProfilUrl) ? data.fotoProfilUrl : '';
         const initial = nama.trim().charAt(0).toUpperCase();
 
         document.getElementById('screenLogin').style.display = 'none';
         document.getElementById('bottomNav').classList.add('show');
         document.getElementById('greetName').textContent = nama;
-        document.getElementById('avatarInit').textContent = initial;
+        document.getElementById('roleLabel').textContent = CURRENT_DEPARTMENT;
         document.getElementById('profilNama').textContent = nama;
-        document.getElementById('profilAvatar').textContent = initial;
+        document.getElementById('profilDept').textContent = CURRENT_DEPARTMENT;
         document.getElementById('profilNik').textContent = nik;
+        document.getElementById('profilPerusahaan').textContent = CURRENT_DEPARTMENT;
+        setAvatarDisplay(CURRENT_FOTO_PROFIL_URL, initial);
 
         const hour = new Date().getHours();
         document.getElementById('greetLabel').textContent =
@@ -376,6 +468,63 @@
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById('screenLogin').style.display = 'block';
     document.getElementById('fNik').value = '';
+  }
+
+  function setAvatarDisplay(url, initial) {
+    const avatarInit = document.getElementById('avatarInit');
+    const profilAvatar = document.getElementById('profilAvatar');
+    if (url) {
+      avatarInit.innerHTML = '<img src="' + url + '" alt="Foto Profil">';
+      profilAvatar.innerHTML = '<img src="' + url + '" alt="Foto Profil">';
+    } else {
+      avatarInit.textContent = initial;
+      profilAvatar.textContent = initial;
+    }
+  }
+
+  function triggerPilihFotoProfil() {
+    document.getElementById('inputFotoProfil').click();
+  }
+
+  document.getElementById('inputFotoProfil').addEventListener('change', function (e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    kompresFotoProfilLaluUpload_(file);
+    this.value = '';
+  });
+
+  function kompresFotoProfilLaluUpload_(file) {
+    const btn = document.getElementById('btnEditFoto');
+    btn.disabled = true;
+    showMsg('Mengunggah foto profil...', 'warn');
+
+    const reader = new FileReader();
+    reader.onload = function (ev) {
+      const img = new Image();
+      img.onload = function () {
+        const MAX_W = 320, MAX_H = 320;
+        let w = img.width, h = img.height;
+        const rasio = Math.min(MAX_W / w, MAX_H / h, 1);
+        w = Math.round(w * rasio); h = Math.round(h * rasio);
+
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        const fotoBase64 = canvas.toDataURL('image/jpeg', 0.7);
+
+        callGas_('setFotoProfilKaryawan', { nama: CURRENT_NAMA, nik: CURRENT_NIK, fotoBase64 },
+          (data) => {
+            btn.disabled = false;
+            CURRENT_FOTO_PROFIL_URL = (data && data.fotoProfilUrl) ? data.fotoProfilUrl : '';
+            setAvatarDisplay(CURRENT_FOTO_PROFIL_URL, CURRENT_NAMA.trim().charAt(0).toUpperCase());
+            showMsg('✅ Foto profil berhasil diperbarui.', 'ok');
+          },
+          err => { btn.disabled = false; showMsg('❌ ' + err.message, 'err'); }
+        );
+      };
+      img.src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
   }
 
   function goTab(tab) {
@@ -536,15 +685,6 @@
       },
       { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
     );
-  }
-</script>
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/sw.js')
-        .then(() => console.log('Service worker terdaftar'))
-        .catch((err) => console.log('Gagal daftar service worker:', err));
-    });
   }
 </script>
 </body>
